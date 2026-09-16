@@ -41,12 +41,7 @@ def main():
     initial_state = {
         "case_id": "CASE-001",
         "document_text": document_text,
-        "questions": [
-            question.model_dump()
-            if hasattr(question, "model_dump")
-            else question
-            for question in questions
-        ],
+        "questions": questions,
         "ingestion_status": "",
         "extraction_status": "",
         "verification_status": "",

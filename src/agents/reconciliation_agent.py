@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.config.settings import settings
 from src.models.assessment_models import ReconciliationResult
+from src.utils.question_helpers import get_question_value
 
 
 def determine_route(confidence: float) -> str:
@@ -24,9 +25,8 @@ def reconciliation_agent(state):
         reconciliation_results = {}
 
         for question in state["questions"]:
-            question_id = question.question_id
-            question_text = question.question
-            field_name = question.field_name
+            question_id = get_question_value(question, "question_id")
+            field_name = get_question_value(question, "field_name")
 
             question_result = question_results.get(question_id, {})
 
@@ -36,9 +36,11 @@ def reconciliation_agent(state):
             verification_status = question_result.get(
                 "verification_status"
             )
+
             verification_confidence = question_result.get(
                 "verification_confidence"
             )
+
             verification_reason = question_result.get(
                 "verification_reason"
             )
@@ -56,14 +58,18 @@ def reconciliation_agent(state):
             else:
                 confidence = verification_confidence
                 route = determine_route(confidence)
-                reason = verification_reason or "Reconciliation completed."
+                reason = (
+                    verification_reason
+                    or "Reconciliation completed."
+                )
 
             reconciliation_result = ReconciliationResult(
                 question_id=question_id,
                 field_name=field_name,
                 value=extracted_value,
-                verification_status=verification_status
-                or "REVIEW_REQUIRED",
+                verification_status=(
+                    verification_status or "REVIEW_REQUIRED"
+                ),
                 confidence=confidence,
                 route=route,
                 reason=reason,
@@ -97,7 +103,7 @@ def reconciliation_agent(state):
 
         audit_log.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "ReconciliationAgent",
                 "action": "Reconciled questionnaire answers",
                 "input": {
@@ -126,7 +132,7 @@ def reconciliation_agent(state):
 
         errors.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "ReconciliationAgent",
                 "error_type": type(exc).__name__,
                 "message": str(exc),
@@ -135,7 +141,7 @@ def reconciliation_agent(state):
 
         audit_log.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "ReconciliationAgent",
                 "action": "Reconciliation failed",
                 "input": {

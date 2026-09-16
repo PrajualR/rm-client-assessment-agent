@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.models.assessment_models import ExtractionResult
+from src.utils.question_helpers import get_question_value
 
 
 def extract_value_from_document(document_text: str, field_name: str):
@@ -48,14 +49,22 @@ def extraction_agent(state):
         document_text = state["document_text"]
         questions = state["questions"]
 
+        if not isinstance(document_text, str):
+            raise TypeError("Document content must be a string.")
+
         extracted_data = {}
         question_results = {}
 
         for question in questions:
-            # QuestionnaireQuestion is a Pydantic model.
-            question_id = question.question_id
-            question_text = question.question
-            field_name = question.field_name
+            question_id = get_question_value(question, "question_id")
+            question_text = get_question_value(question, "question")
+            field_name = get_question_value(question, "field_name")
+
+            if not question_id or not field_name:
+                raise ValueError(
+                    "Each questionnaire question must contain "
+                    "'question_id' and 'field_name'."
+                )
 
             extracted_value = extract_value_from_document(
                 document_text=document_text,
@@ -87,7 +96,7 @@ def extraction_agent(state):
 
         audit_log.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "ExtractionAgent",
                 "action": "Extracted questionnaire answers",
                 "input": {
@@ -114,7 +123,7 @@ def extraction_agent(state):
 
         errors.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "ExtractionAgent",
                 "error_type": type(exc).__name__,
                 "message": str(exc),
@@ -123,7 +132,7 @@ def extraction_agent(state):
 
         audit_log.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "ExtractionAgent",
                 "action": "Document extraction failed",
                 "input": {

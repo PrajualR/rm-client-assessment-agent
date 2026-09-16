@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from src.config.settings import settings
 from src.models.assessment_models import VerificationResult
+from src.utils.question_helpers import get_question_value
 
 
 def verify_field(field_name: str, value):
@@ -27,7 +28,10 @@ def verify_field(field_name: str, value):
                 value=value,
                 verification_status="PASSED",
                 confidence=0.95,
-                reason="Country is present in the configured allowed-country list.",
+                reason=(
+                    "Country is present in the configured "
+                    "allowed-country list."
+                ),
             )
 
         return VerificationResult(
@@ -35,7 +39,10 @@ def verify_field(field_name: str, value):
             value=value,
             verification_status="FAILED",
             confidence=0.30,
-            reason="Country is not present in the configured allowed-country list.",
+            reason=(
+                "Country is not present in the configured "
+                "allowed-country list."
+            ),
         )
 
     if field_name == "business_activity":
@@ -45,7 +52,10 @@ def verify_field(field_name: str, value):
                 value=value,
                 verification_status="PASSED",
                 confidence=0.95,
-                reason="Business activity contains a valid descriptive value.",
+                reason=(
+                    "Business activity contains a valid "
+                    "descriptive value."
+                ),
             )
 
         return VerificationResult(
@@ -66,7 +76,10 @@ def verify_field(field_name: str, value):
                     value=value,
                     verification_status="PASSED",
                     confidence=0.95,
-                    reason="Annual revenue is a valid non-negative numeric value.",
+                    reason=(
+                        "Annual revenue is a valid "
+                        "non-negative numeric value."
+                    ),
                 )
 
             return VerificationResult(
@@ -123,9 +136,8 @@ def verification_agent(state):
         question_results = dict(state.get("question_results", {}))
 
         for question in state["questions"]:
-            # QuestionnaireQuestion is a Pydantic model.
-            question_id = question.question_id
-            field_name = question.field_name
+            question_id = get_question_value(question, "question_id")
+            field_name = get_question_value(question, "field_name")
 
             extracted_result = question_results.get(question_id, {})
 
@@ -142,8 +154,12 @@ def verification_agent(state):
 
             question_results[question_id] = {
                 **extracted_result,
-                "verification_status": verification_result.verification_status,
-                "verification_confidence": verification_result.confidence,
+                "verification_status": (
+                    verification_result.verification_status
+                ),
+                "verification_confidence": (
+                    verification_result.confidence
+                ),
                 "verification_reason": verification_result.reason,
             }
 
@@ -151,7 +167,7 @@ def verification_agent(state):
 
         audit_log.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "VerificationAgent",
                 "action": "Verified questionnaire answers",
                 "input": {
@@ -176,18 +192,18 @@ def verification_agent(state):
         errors = list(state.get("errors", []))
         audit_log = list(state.get("audit_log", []))
 
-        error_details = {
-            "timestamp": datetime.now(),
-            "agent": "VerificationAgent",
-            "error_type": type(exc).__name__,
-            "message": str(exc),
-        }
-
-        errors.append(error_details)
+        errors.append(
+            {
+                "timestamp": datetime.now(timezone.utc),
+                "agent": "VerificationAgent",
+                "error_type": type(exc).__name__,
+                "message": str(exc),
+            }
+        )
 
         audit_log.append(
             {
-                "timestamp": datetime.now(),
+                "timestamp": datetime.now(timezone.utc),
                 "agent": "VerificationAgent",
                 "action": "Verification failed",
                 "input": {
@@ -204,7 +220,7 @@ def verification_agent(state):
             **state,
             "verification_status": "failed",
             "verification_results": {},
-            "question_results": state.get("question_results", {}),
+            "question_results": question_results,
             "errors": errors,
             "audit_log": audit_log,
             "final_route": "HUMAN_REVIEW",
