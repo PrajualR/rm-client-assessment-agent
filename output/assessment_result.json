@@ -1,0 +1,139 @@
+{
+    "case_id": "CASE-001",
+    "workflow_status": "AUTO_FILL_READY",
+    "final_route": "AUTO_FILL",
+    "summary": {
+        "total_questions": 4,
+        "auto_fill_count": 4,
+        "escalation_count": 0,
+        "human_review_count": 0,
+        "answered_count": 4,
+        "missing_count": 0
+    },
+    "question_results": [
+        {
+            "question_id": "Q1",
+            "question": "What is the client's country of incorporation?",
+            "field_name": "country_of_incorporation",
+            "extracted_value": "India",
+            "extraction_status": "FOUND",
+            "verification_status": "PASSED",
+            "verification_confidence": 0.95,
+            "verification_reason": "Country is present in the allowed country list.",
+            "final_value": "India",
+            "final_confidence": 0.95,
+            "final_route": "AUTO_FILL",
+            "final_reason": "Country is present in the allowed country list."
+        },
+        {
+            "question_id": "Q2",
+            "question": "What is the client's business activity?",
+            "field_name": "business_activity",
+            "extracted_value": "Software and IT Services",
+            "extraction_status": "FOUND",
+            "verification_status": "PASSED",
+            "verification_confidence": 0.9,
+            "verification_reason": "Business activity contains a valid description.",
+            "final_value": "Software and IT Services",
+            "final_confidence": 0.9,
+            "final_route": "AUTO_FILL",
+            "final_reason": "Business activity contains a valid description."
+        },
+        {
+            "question_id": "Q3",
+            "question": "What is the client's annual revenue?",
+            "field_name": "annual_revenue",
+            "extracted_value": "INR 48.5 Crores",
+            "extraction_status": "FOUND",
+            "verification_status": "PASSED",
+            "verification_confidence": 0.9,
+            "verification_reason": "Revenue contains currency and expected unit.",
+            "final_value": "INR 48.5 Crores",
+            "final_confidence": 0.9,
+            "final_route": "AUTO_FILL",
+            "final_reason": "Revenue contains currency and expected unit."
+        },
+        {
+            "question_id": "Q4",
+            "question": "Does the client have an existing bank relationship?",
+            "field_name": "existing_bank_relationship",
+            "extracted_value": "Yes",
+            "extraction_status": "FOUND",
+            "verification_status": "PASSED",
+            "verification_confidence": 0.95,
+            "verification_reason": "Bank relationship value is valid.",
+            "final_value": "Yes",
+            "final_confidence": 0.95,
+            "final_route": "AUTO_FILL",
+            "final_reason": "Bank relationship value is valid."
+        }
+    ],
+    "errors": [],
+    "audit_log": [
+        {
+            "timestamp": "2026-09-16T14:54:20.928988Z",
+            "agent": "IngestionAgent",
+            "action": "Validated input document",
+            "input": {
+                "document_length": 287
+            },
+            "output": {
+                "ingestion_status": "success"
+            }
+        },
+        {
+            "timestamp": "2026-09-16T14:54:20.930394Z",
+            "agent": "ExtractionAgent",
+            "action": "Extracted questionnaire answers from document",
+            "input": {
+                "document_length": 287,
+                "question_count": 4
+            },
+            "output": {
+                "extracted_field_count": 4,
+                "missing_field_count": 0
+            }
+        },
+        {
+            "timestamp": "2026-09-16T14:54:20.931701Z",
+            "agent": "VerificationAgent",
+            "action": "Verified extracted questionnaire answers",
+            "input": {
+                "question_count": 4,
+                "extracted_field_count": 4
+            },
+            "output": {
+                "verified_field_count": 4,
+                "failed_field_count": 0
+            }
+        },
+        {
+            "timestamp": "2026-09-16T14:54:20.932809Z",
+            "agent": "ReconciliationAgent",
+            "action": "Reconciled questionnaire answers and determined routing",
+            "input": {
+                "question_count": 4
+            },
+            "output": {
+                "final_route": "AUTO_FILL",
+                "route_counts": {
+                    "AUTO_FILL": 4,
+                    "ESCALATE": 0,
+                    "HUMAN_REVIEW": 0
+                }
+            }
+        },
+        {
+            "timestamp": "2026-09-16T14:54:20.933746Z",
+            "agent": "WorkflowRouter",
+            "action": "Assessment routed for automatic form population",
+            "input": {
+                "final_route": "AUTO_FILL"
+            },
+            "output": {
+                "workflow_status": "AUTO_FILL_READY",
+                "next_action": "Populate assessment form automatically"
+            }
+        }
+    ]
+}
