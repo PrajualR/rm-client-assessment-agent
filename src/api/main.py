@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-
+from fastapi.middleware.cors import CORSMiddleware
 from data.mock_questionnaire import questions
 from src.graph.workflow import build_graph
 from src.services.assessment_response import build_assessment_response
@@ -12,6 +12,13 @@ app = FastAPI(
         "client assessment questionnaire responses."
     ),
     version="1.0.0",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
