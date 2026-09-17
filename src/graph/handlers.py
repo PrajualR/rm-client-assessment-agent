@@ -10,7 +10,7 @@ def auto_fill_handler(state):
             "agent": "WorkflowRouter",
             "action": "Assessment routed for automatic form population",
             "input": {
-                "final_route": state["final_route"],
+                "final_route": state.get("final_route"),
             },
             "output": {
                 "workflow_status": "AUTO_FILL_READY",
@@ -20,6 +20,8 @@ def auto_fill_handler(state):
     )
 
     return {
+        **state,
+        "final_route": "AUTO_FILL",
         "workflow_status": "AUTO_FILL_READY",
         "audit_log": audit_log,
     }
@@ -40,7 +42,7 @@ def escalation_handler(state):
             "agent": "WorkflowRouter",
             "action": "Assessment routed for escalation",
             "input": {
-                "final_route": state["final_route"],
+                "final_route": "ESCALATE",
                 "question_ids": escalation_questions,
             },
             "output": {
@@ -51,10 +53,11 @@ def escalation_handler(state):
     )
 
     return {
+        **state,
+        "final_route": "ESCALATE",
         "workflow_status": "ESCALATION_REQUIRED",
         "audit_log": audit_log,
     }
-
 
 def human_review_handler(state):
     audit_log = list(state.get("audit_log", []))
@@ -71,17 +74,19 @@ def human_review_handler(state):
             "agent": "WorkflowRouter",
             "action": "Assessment routed for mandatory human review",
             "input": {
-                "final_route": state["final_route"],
+                "final_route": "HUMAN_REVIEW",
                 "question_ids": review_questions,
             },
             "output": {
                 "workflow_status": "HUMAN_REVIEW_REQUIRED",
-                "next_action": ("Obtain reviewer decision before proceeding"),
+                "next_action": "Obtain reviewer decision before proceeding",
             },
         }
     )
 
     return {
+        **state,
+        "final_route": "HUMAN_REVIEW",
         "workflow_status": "HUMAN_REVIEW_REQUIRED",
         "audit_log": audit_log,
     }

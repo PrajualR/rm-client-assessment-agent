@@ -50,7 +50,7 @@ def force_all_fields_auto_fill(monkeypatch):
     used by the real verify_field() function.
     """
 
-    def fake_verify_field(field_name, value):
+    def fake_verify_field(field_name, value, trusted_value=None):
         return VerificationResult(
             field_name=field_name,
             value=value,
@@ -76,8 +76,7 @@ def force_one_field_confidence(
     selected field.
     """
 
-    def fake_verify_field(field_name, value):
-
+    def fake_verify_field(field_name, value, trusted_value=None):
         if field_name == target_field:
 
             verification_status = "PASSED" if confidence >= 0.60 else "REVIEW_REQUIRED"

@@ -1,12 +1,12 @@
 {
     "case_id": "CASE-001",
-    "workflow_status": "AUTO_FILL_READY",
-    "final_route": "AUTO_FILL",
+    "workflow_status": "HUMAN_REVIEW_REQUIRED",
+    "final_route": "HUMAN_REVIEW",
     "summary": {
         "total_questions": 4,
-        "auto_fill_count": 4,
+        "auto_fill_count": 2,
         "escalation_count": 0,
-        "human_review_count": 0,
+        "human_review_count": 2,
         "answered_count": 4,
         "missing_count": 0
     },
@@ -19,11 +19,11 @@
             "extraction_status": "FOUND",
             "verification_status": "PASSED",
             "verification_confidence": 0.95,
-            "verification_reason": "Country is present in the allowed country list.",
+            "verification_reason": "Extracted value passed validation and matched trusted client data.",
             "final_value": "India",
             "final_confidence": 0.95,
             "final_route": "AUTO_FILL",
-            "final_reason": "Country is present in the allowed country list."
+            "final_reason": "Extracted value passed validation and matched trusted client data."
         },
         {
             "question_id": "Q2",
@@ -31,27 +31,27 @@
             "field_name": "business_activity",
             "extracted_value": "Software and IT Services",
             "extraction_status": "FOUND",
-            "verification_status": "PASSED",
-            "verification_confidence": 0.9,
-            "verification_reason": "Business activity contains a valid description.",
+            "verification_status": "FAILED",
+            "verification_confidence": 0.3,
+            "verification_reason": "Extracted value did not match trusted client data.",
             "final_value": "Software and IT Services",
-            "final_confidence": 0.9,
-            "final_route": "AUTO_FILL",
-            "final_reason": "Business activity contains a valid description."
+            "final_confidence": 0.3,
+            "final_route": "HUMAN_REVIEW",
+            "final_reason": "Extracted value did not match trusted client data."
         },
         {
             "question_id": "Q3",
             "question": "What is the client's annual revenue?",
             "field_name": "annual_revenue",
-            "extracted_value": "INR 48.5 Crores",
+            "extracted_value": "INR 25 Crores",
             "extraction_status": "FOUND",
-            "verification_status": "PASSED",
-            "verification_confidence": 0.9,
-            "verification_reason": "Revenue contains currency and expected unit.",
-            "final_value": "INR 48.5 Crores",
-            "final_confidence": 0.9,
-            "final_route": "AUTO_FILL",
-            "final_reason": "Revenue contains currency and expected unit."
+            "verification_status": "FAILED",
+            "verification_confidence": 0.3,
+            "verification_reason": "Extracted value did not match trusted client data.",
+            "final_value": "INR 25 Crores",
+            "final_confidence": 0.3,
+            "final_route": "HUMAN_REVIEW",
+            "final_reason": "Extracted value did not match trusted client data."
         },
         {
             "question_id": "Q4",
@@ -61,78 +61,78 @@
             "extraction_status": "FOUND",
             "verification_status": "PASSED",
             "verification_confidence": 0.95,
-            "verification_reason": "Bank relationship value is valid.",
+            "verification_reason": "Extracted value passed validation and matched trusted client data.",
             "final_value": "Yes",
             "final_confidence": 0.95,
             "final_route": "AUTO_FILL",
-            "final_reason": "Bank relationship value is valid."
+            "final_reason": "Extracted value passed validation and matched trusted client data."
         }
     ],
     "errors": [],
     "audit_log": [
         {
-            "timestamp": "2026-09-16T14:54:20.928988Z",
+            "timestamp": "2026-09-17T12:03:58.865620Z",
             "agent": "IngestionAgent",
             "action": "Validated input document",
             "input": {
-                "document_length": 287
+                "document_length": 285
             },
             "output": {
                 "ingestion_status": "success"
             }
         },
         {
-            "timestamp": "2026-09-16T14:54:20.930394Z",
+            "timestamp": "2026-09-17T12:03:58.867664Z",
             "agent": "ExtractionAgent",
-            "action": "Extracted questionnaire answers from document",
+            "action": "Extracted questionnaire answers",
             "input": {
-                "document_length": 287,
                 "question_count": 4
             },
             "output": {
-                "extracted_field_count": 4,
-                "missing_field_count": 0
-            }
-        },
-        {
-            "timestamp": "2026-09-16T14:54:20.931701Z",
-            "agent": "VerificationAgent",
-            "action": "Verified extracted questionnaire answers",
-            "input": {
-                "question_count": 4,
+                "extraction_status": "success",
                 "extracted_field_count": 4
-            },
-            "output": {
-                "verified_field_count": 4,
-                "failed_field_count": 0
             }
         },
         {
-            "timestamp": "2026-09-16T14:54:20.932809Z",
+            "timestamp": "2026-09-17T12:03:58.869227Z",
+            "agent": "VerificationAgent",
+            "action": "Compared extracted answers with trusted client data",
+            "input": {
+                "case_id": "CASE-001",
+                "question_count": 4
+            },
+            "output": {
+                "verification_status": "success",
+                "verified_field_count": 4
+            }
+        },
+        {
+            "timestamp": "2026-09-17T12:03:58.870128Z",
             "agent": "ReconciliationAgent",
-            "action": "Reconciled questionnaire answers and determined routing",
+            "action": "Reconciled questionnaire answers",
             "input": {
                 "question_count": 4
             },
             "output": {
-                "final_route": "AUTO_FILL",
-                "route_counts": {
-                    "AUTO_FILL": 4,
-                    "ESCALATE": 0,
-                    "HUMAN_REVIEW": 0
-                }
+                "reconciliation_status": "success",
+                "final_route": "HUMAN_REVIEW",
+                "question_count": 4
             }
         },
         {
-            "timestamp": "2026-09-16T14:54:20.933746Z",
+            "timestamp": "2026-09-17T12:03:58.870825Z",
             "agent": "WorkflowRouter",
-            "action": "Assessment routed for automatic form population",
+            "action": "Assessment routed for mandatory human review",
             "input": {
-                "final_route": "AUTO_FILL"
+                "final_route": "HUMAN_REVIEW",
+                "question_ids": [
+                    "Q2",
+                    "Q3"
+                ]
             },
             "output": {
-                "workflow_status": "AUTO_FILL_READY",
-                "next_action": "Populate assessment form automatically"
+                "workflow_status": "HUMAN_REVIEW_REQUIRED",
+                "next_action": "Obtain reviewer decision before proceeding"
             }
         }
     ]
