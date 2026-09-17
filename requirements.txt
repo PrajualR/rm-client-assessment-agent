@@ -4,3 +4,8 @@ langchain-community
 langgraph
 black
 isort
+fastapi
+uvicorn[standard]
+pydantic>=2.0
+pytest
+langchain-core

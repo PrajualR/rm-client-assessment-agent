@@ -5,7 +5,6 @@ from data.mock_questionnaire import questions
 from src.graph.workflow import build_graph
 from src.services.assessment_response import build_assessment_response
 
-
 app = FastAPI(
     title="Client Assessment Agent API",
     description=(

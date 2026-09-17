@@ -4,11 +4,8 @@ from src.agents.extraction_agent import extraction_agent
 from src.agents.ingestion_agent import ingestion_agent
 from src.agents.reconciliation_agent import reconciliation_agent
 from src.agents.verification_agent import verification_agent
-from src.graph.handlers import (
-    auto_fill_handler,
-    escalation_handler,
-    human_review_handler,
-)
+from src.graph.handlers import (auto_fill_handler, escalation_handler,
+                                human_review_handler)
 from src.graph.state import AssessmentState
 
 

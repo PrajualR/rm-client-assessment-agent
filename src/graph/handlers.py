@@ -30,9 +30,7 @@ def escalation_handler(state):
 
     escalation_questions = [
         question_id
-        for question_id, result in state.get(
-            "reconciliation_results", {}
-        ).items()
+        for question_id, result in state.get("reconciliation_results", {}).items()
         if result["route"] == "ESCALATE"
     ]
 
@@ -63,9 +61,7 @@ def human_review_handler(state):
 
     review_questions = [
         question_id
-        for question_id, result in state.get(
-            "reconciliation_results", {}
-        ).items()
+        for question_id, result in state.get("reconciliation_results", {}).items()
         if result["route"] == "HUMAN_REVIEW"
     ]
 
@@ -80,9 +76,7 @@ def human_review_handler(state):
             },
             "output": {
                 "workflow_status": "HUMAN_REVIEW_REQUIRED",
-                "next_action": (
-                    "Obtain reviewer decision before proceeding"
-                ),
+                "next_action": ("Obtain reviewer decision before proceeding"),
             },
         }
     )

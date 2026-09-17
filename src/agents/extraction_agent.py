@@ -71,9 +71,7 @@ def extraction_agent(state):
                 field_name=field_name,
             )
 
-            extraction_status = (
-                "FOUND" if extracted_value is not None else "MISSING"
-            )
+            extraction_status = "FOUND" if extracted_value is not None else "MISSING"
 
             extraction_result = ExtractionResult(
                 question_id=question_id,

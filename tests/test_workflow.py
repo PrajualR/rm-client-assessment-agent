@@ -3,7 +3,6 @@ from src.agents import verification_agent
 from src.graph.workflow import build_graph
 from src.models.assessment_models import VerificationResult
 
-
 VALID_DOCUMENT = """
 Client Name: ABC Technologies
 Country of Incorporation: India
@@ -17,10 +16,8 @@ def create_initial_state(document_text: str) -> dict:
     return {
         "case_id": "TEST-001",
         "document_text": document_text,
-
         # Use the same questionnaire objects used by the application.
         "questions": questions,
-
         "ingestion_status": "",
         "extraction_status": "",
         "verification_status": "",
@@ -83,11 +80,7 @@ def force_one_field_confidence(
 
         if field_name == target_field:
 
-            verification_status = (
-                "PASSED"
-                if confidence >= 0.60
-                else "REVIEW_REQUIRED"
-            )
+            verification_status = "PASSED" if confidence >= 0.60 else "REVIEW_REQUIRED"
 
             return VerificationResult(
                 field_name=field_name,
@@ -150,20 +143,11 @@ def test_escalation_flow(monkeypatch):
     assert business_activity_result["route"] == "ESCALATE"
     assert business_activity_result["confidence"] == 0.70
 
-    assert (
-        result["reconciliation_results"]["Q1"]["route"]
-        == "AUTO_FILL"
-    )
+    assert result["reconciliation_results"]["Q1"]["route"] == "AUTO_FILL"
 
-    assert (
-        result["reconciliation_results"]["Q3"]["route"]
-        == "AUTO_FILL"
-    )
+    assert result["reconciliation_results"]["Q3"]["route"] == "AUTO_FILL"
 
-    assert (
-        result["reconciliation_results"]["Q4"]["route"]
-        == "AUTO_FILL"
-    )
+    assert result["reconciliation_results"]["Q4"]["route"] == "AUTO_FILL"
 
 
 def test_human_review_flow(monkeypatch):
@@ -183,20 +167,11 @@ def test_human_review_flow(monkeypatch):
     assert annual_revenue_result["route"] == "HUMAN_REVIEW"
     assert annual_revenue_result["confidence"] == 0.40
 
-    assert (
-        result["reconciliation_results"]["Q1"]["route"]
-        == "AUTO_FILL"
-    )
+    assert result["reconciliation_results"]["Q1"]["route"] == "AUTO_FILL"
 
-    assert (
-        result["reconciliation_results"]["Q2"]["route"]
-        == "AUTO_FILL"
-    )
+    assert result["reconciliation_results"]["Q2"]["route"] == "AUTO_FILL"
 
-    assert (
-        result["reconciliation_results"]["Q4"]["route"]
-        == "AUTO_FILL"
-    )
+    assert result["reconciliation_results"]["Q4"]["route"] == "AUTO_FILL"
 
 
 def test_missing_document_value():
@@ -213,22 +188,13 @@ Existing Bank Relationship: Yes
 
     assert annual_revenue_result["extracted_value"] is None
 
-    assert (
-        annual_revenue_result["extraction_status"]
-        == "MISSING"
-    )
+    assert annual_revenue_result["extraction_status"] == "MISSING"
 
     assert result["final_route"] == "HUMAN_REVIEW"
 
-    assert (
-        result["workflow_status"]
-        == "HUMAN_REVIEW_REQUIRED"
-    )
+    assert result["workflow_status"] == "HUMAN_REVIEW_REQUIRED"
 
-    assert (
-        result["reconciliation_results"]["Q3"]["route"]
-        == "HUMAN_REVIEW"
-    )
+    assert result["reconciliation_results"]["Q3"]["route"] == "HUMAN_REVIEW"
 
 
 def test_invalid_field_value():
@@ -250,10 +216,7 @@ Existing Bank Relationship: Yes
 
     assert result["final_route"] == "HUMAN_REVIEW"
 
-    assert (
-        result["workflow_status"]
-        == "HUMAN_REVIEW_REQUIRED"
-    )
+    assert result["workflow_status"] == "HUMAN_REVIEW_REQUIRED"
 
 
 def test_ingestion_failure():
@@ -263,9 +226,29 @@ def test_ingestion_failure():
 
     assert result["final_route"] == "HUMAN_REVIEW"
 
-    assert (
-        result["workflow_status"]
-        == "HUMAN_REVIEW_REQUIRED"
-    )
+    assert result["workflow_status"] == "HUMAN_REVIEW_REQUIRED"
 
     assert len(result["errors"]) > 0
+
+
+from src.agents.verification_agent import normalize_annual_revenue
+
+
+def test_normalize_annual_revenue_plain_number():
+    assert normalize_annual_revenue("10000000") == 10000000.0
+
+
+def test_normalize_annual_revenue_crores():
+    assert normalize_annual_revenue("INR 48.5 Crores") == 485000000.0
+
+
+def test_normalize_annual_revenue_rupee_symbol():
+    assert normalize_annual_revenue("₹48.5 crore") == 485000000.0
+
+
+def test_normalize_annual_revenue_lakhs():
+    assert normalize_annual_revenue("INR 2.5 Lakhs") == 250000.0
+
+
+def test_normalize_invalid_revenue():
+    assert normalize_annual_revenue("not available") is None

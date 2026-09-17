@@ -1,17 +1,11 @@
-from src.models.assessment_models import (
-    AssessmentError,
-    AssessmentResponse,
-    AssessmentSummary,
-    AuditEntry,
-    QuestionResult,
-)
+from src.models.assessment_models import (AssessmentError, AssessmentResponse,
+                                          AssessmentSummary, AuditEntry,
+                                          QuestionResult)
 
 
 def build_assessment_response(state):
     question_results = [
-        QuestionResult(
-            **question_result
-        )
+        QuestionResult(**question_result)
         for question_result in state.get(
             "question_results",
             {},
@@ -36,9 +30,7 @@ def build_assessment_response(state):
             route_counts[route] += 1
 
     answered_count = sum(
-        1
-        for result in question_results
-        if result.extracted_value is not None
+        1 for result in question_results if result.extracted_value is not None
     )
 
     missing_count = len(question_results) - answered_count
@@ -52,15 +44,9 @@ def build_assessment_response(state):
         missing_count=missing_count,
     )
 
-    errors = [
-        AssessmentError(**error)
-        for error in state.get("errors", [])
-    ]
+    errors = [AssessmentError(**error) for error in state.get("errors", [])]
 
-    audit_log = [
-        AuditEntry(**entry)
-        for entry in state.get("audit_log", [])
-    ]
+    audit_log = [AuditEntry(**entry) for entry in state.get("audit_log", [])]
 
     return AssessmentResponse(
         case_id=state["case_id"],

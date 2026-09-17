@@ -33,17 +33,11 @@ def reconciliation_agent(state):
             extracted_value = question_result.get("extracted_value")
             extraction_status = question_result.get("extraction_status")
 
-            verification_status = question_result.get(
-                "verification_status"
-            )
+            verification_status = question_result.get("verification_status")
 
-            verification_confidence = question_result.get(
-                "verification_confidence"
-            )
+            verification_confidence = question_result.get("verification_confidence")
 
-            verification_reason = question_result.get(
-                "verification_reason"
-            )
+            verification_reason = question_result.get("verification_reason")
 
             if extraction_status == "MISSING":
                 confidence = 0.0
@@ -58,26 +52,19 @@ def reconciliation_agent(state):
             else:
                 confidence = verification_confidence
                 route = determine_route(confidence)
-                reason = (
-                    verification_reason
-                    or "Reconciliation completed."
-                )
+                reason = verification_reason or "Reconciliation completed."
 
             reconciliation_result = ReconciliationResult(
                 question_id=question_id,
                 field_name=field_name,
                 value=extracted_value,
-                verification_status=(
-                    verification_status or "REVIEW_REQUIRED"
-                ),
+                verification_status=(verification_status or "REVIEW_REQUIRED"),
                 confidence=confidence,
                 route=route,
                 reason=reason,
             )
 
-            reconciliation_results[question_id] = (
-                reconciliation_result.model_dump()
-            )
+            reconciliation_results[question_id] = reconciliation_result.model_dump()
 
             question_results[question_id] = {
                 **question_result,
@@ -87,10 +74,7 @@ def reconciliation_agent(state):
                 "final_reason": reason,
             }
 
-        routes = [
-            result["route"]
-            for result in reconciliation_results.values()
-        ]
+        routes = [result["route"] for result in reconciliation_results.values()]
 
         if "HUMAN_REVIEW" in routes:
             final_route = "HUMAN_REVIEW"

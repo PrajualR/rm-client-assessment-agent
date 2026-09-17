@@ -1,6 +1,5 @@
 from src.models.assessment_models import QuestionnaireQuestion
 
-
 questions = [
     QuestionnaireQuestion(
         question_id="Q1",

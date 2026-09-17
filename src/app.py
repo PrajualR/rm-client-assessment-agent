@@ -4,10 +4,7 @@ from pathlib import Path
 from data.mock_questionnaire import questions
 from src.config.settings import settings
 from src.graph.workflow import build_graph
-from src.services.assessment_response import (
-    build_assessment_response,
-)
-
+from src.services.assessment_response import build_assessment_response
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = PROJECT_ROOT / "data"
@@ -15,30 +12,44 @@ GRAPH_DIR = PROJECT_ROOT / "src" / "graph"
 OUTPUT_DIR = PROJECT_ROOT / "output"
 
 
-def main():
-    graph = build_graph()
+def save_graph_diagram(graph) -> None:
+    """
+    Generate and save the LangGraph diagram.
 
-    print("Assessment configuration loaded.")
-    print("Auto-fill threshold:", settings.auto_fill_threshold)
-    print("Escalation threshold:", settings.escalation_threshold)
-
+    Mermaid rendering may require an external service or network
+    access. If rendering fails, the assessment workflow continues.
+    """
     GRAPH_DIR.mkdir(parents=True, exist_ok=True)
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    png_data = graph.get_graph().draw_mermaid_png()
     graph_image_path = GRAPH_DIR / "assessment_graph.png"
 
-    with open(graph_image_path, "wb") as file:
-        file.write(png_data)
+    try:
+        png_data = graph.get_graph().draw_mermaid_png()
+        graph_image_path.write_bytes(png_data)
 
-    print(f"Graph image saved to {graph_image_path}")
+        print(f"Graph image saved to {graph_image_path}")
 
+    except Exception as error:
+        print("Graph image could not be generated.")
+        print(f"Reason: {error}")
+        print("Continuing without the graph image.")
+
+
+def load_document() -> str:
+    """
+    Load the mock assessment document.
+    """
     document_path = DATA_DIR / "mock_document.txt"
 
-    with open(document_path, "r", encoding="utf-8") as file:
-        document_text = file.read()
+    with document_path.open("r", encoding="utf-8") as file:
+        return file.read()
 
-    initial_state = {
+
+def build_initial_state(document_text: str) -> dict:
+    """
+    Build the initial LangGraph state for the assessment case.
+    """
+    return {
         "case_id": "CASE-001",
         "document_text": document_text,
         "questions": questions,
@@ -56,19 +67,29 @@ def main():
         "audit_log": [],
     }
 
-    result = graph.invoke(initial_state)
 
-    response = build_assessment_response(result)
+def save_assessment_response(response) -> Path:
+    """
+    Save the final assessment response as JSON.
+    """
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     output_path = OUTPUT_DIR / "assessment_result.json"
 
-    with open(output_path, "w", encoding="utf-8") as file:
+    with output_path.open("w", encoding="utf-8") as file:
         json.dump(
             response.model_dump(mode="json"),
             file,
             indent=4,
         )
 
+    return output_path
+
+
+def print_assessment_summary(response) -> None:
+    """
+    Print the final assessment summary to the console.
+    """
     print("\nAssessment completed.")
     print("Case ID:", response.case_id)
     print("Workflow status:", response.workflow_status)
@@ -94,6 +115,30 @@ def main():
         )
 
     print("\nAudit entries:", len(response.audit_log))
+
+
+def main():
+    graph = build_graph()
+
+    print("Assessment configuration loaded.")
+    print("Auto-fill threshold:", settings.auto_fill_threshold)
+    print("Escalation threshold:", settings.escalation_threshold)
+
+    # Mermaid is only used for visualization.
+    # Failure here must not stop the actual workflow.
+    save_graph_diagram(graph)
+
+    document_text = load_document()
+    initial_state = build_initial_state(document_text)
+
+    result = graph.invoke(initial_state)
+
+    response = build_assessment_response(result)
+
+    output_path = save_assessment_response(response)
+
+    print_assessment_summary(response)
+
     print("JSON response saved to:", output_path)
 
 
